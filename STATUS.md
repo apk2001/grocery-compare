@@ -41,3 +41,11 @@ only the `/agents` list endpoint rejects it. Full `/compare` flow verified live:
 real Zepto search (Apify) → live agent match → totals → ranking. Example: milk ₹22×2 +
 bread ₹52 = ₹96, "unicorn cheese" correctly null. matcher.py + zepto.py both pass against
 the real services. Remaining for MVP v1: push to GitHub + deploy on Render.
+
+## DEPLOYED 2026-10-24 ✅ LIVE
+
+- GitHub: https://github.com/apk2001/grocery-compare (private)
+- Render: https://grocery-compare-wdzz.onrender.com  (Singapore, free tier)
+  - `GET /` → {"ok":true};  `GET /docs` → Swagger UI
+  - `POST /compare` verified live: Aavin milk ₹22×2 = ₹44, real Zepto search + live agent.
+- Note: free instance sleeps after ~15 min idle; first request then takes ~50s to wake.

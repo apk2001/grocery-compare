@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Grocery Compare</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="phone">
+    <header class="bar">
+      <button class="back" aria-label="Back">&#8249;</button>
+      <div class="avatar">🛒</div>
+      <div class="meta">
+        <div class="title">Grocery Compare</div>
+        <div class="status" id="status">online</div>
+      </div>
+      <button class="menu" id="resetBtn" aria-label="New chat">&#8635;</button>
+    </header>
+
+    <main class="chat" id="chat" aria-live="polite"></main>
+
+    <form class="composer" id="composer" autocomplete="off">
+      <input id="input" type="text" placeholder="Type a grocery list…" aria-label="Message" />
+      <button class="send" id="send" type="submit" aria-label="Send">&#10148;</button>
+    </form>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
