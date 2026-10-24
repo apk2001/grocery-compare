@@ -2,10 +2,11 @@ import os
 
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+import analytics
 from agent1 import agent1
 from chat import handle
 from models import CompareRequest
@@ -35,7 +36,18 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 async def chat(req: ChatRequest):
+    analytics.record(req.session_id, "visit" if req.text.strip() == "__start__" else "message")
     return await handle(req.session_id, req.text)
+
+
+@app.get("/stats", response_class=HTMLResponse)
+def stats_page():
+    return analytics.render_html()
+
+
+@app.get("/stats.json")
+def stats_json():
+    return analytics.stats()
 
 
 # Chat UI (served last so API routes above take precedence)
