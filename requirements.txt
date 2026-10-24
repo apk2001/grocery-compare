@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+pydantic>=2
+httpx
+mcp>=1.10,<2

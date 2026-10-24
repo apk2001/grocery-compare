@@ -1,0 +1,27 @@
+# Render Blueprint. In Render: New → Blueprint → connect this repo.
+# Render reads this file and prompts for the 3 secret values (sync: false).
+services:
+  - type: web
+    name: grocery-compare
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: AGENTICORG_BASE_URL
+        value: https://agenticorg.hackathon.pinelabs.com
+      - key: AGENT_ID
+        value: 21b417e7-76fa-4e20-ae11-651a37c5fdc5
+      - key: ENABLE_INSTAMART
+        value: "false"
+      # Secrets — Render will ask you to enter these at deploy (not stored in the repo):
+      - key: AGENTICORG_API_KEY
+        sync: false
+      - key: APIFY_TOKEN
+        sync: false
+      - key: SWIGGY_TOKEN
+        sync: false
