@@ -4,7 +4,7 @@ import os
 import httpx
 
 import cache
-from adapters import zepto
+from adapters import blinkit, zepto
 from matcher import match
 from models import MatchedItem, PlatformResult
 
@@ -72,6 +72,14 @@ async def run_zepto(items, loc):
         return _failed("zepto", items, e)
 
 
+async def run_blinkit(items, loc):
+    try:
+        async with httpx.AsyncClient() as client:
+            return await _run("blinkit", blinkit.search, client, items, loc)
+    except Exception as e:
+        return _failed("blinkit", items, e)
+
+
 async def run_instamart(items, loc):
     try:
         from adapters import instamart  # lazy: only needs the `mcp` package when enabled
@@ -84,6 +92,8 @@ async def run_instamart(items, loc):
 
 async def agent1(items, loc):
     jobs = [run_zepto(items, loc)]
+    if os.environ.get("ENABLE_BLINKIT", "true").lower() == "true":
+        jobs.append(run_blinkit(items, loc))
     if os.environ.get("ENABLE_INSTAMART", "false").lower() == "true":
         jobs.append(run_instamart(items, loc))
     return list(await asyncio.gather(*jobs))

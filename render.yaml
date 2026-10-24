@@ -16,6 +16,8 @@ services:
         value: https://agenticorg.hackathon.pinelabs.com
       - key: AGENT_ID
         value: 21b417e7-76fa-4e20-ae11-651a37c5fdc5
+      - key: ENABLE_BLINKIT
+        value: "true"
       - key: ENABLE_INSTAMART
         value: "false"
       # Secrets — Render will ask you to enter these at deploy (not stored in the repo):

@@ -49,3 +49,26 @@ the real services. Remaining for MVP v1: push to GitHub + deploy on Render.
   - `GET /` → {"ok":true};  `GET /docs` → Swagger UI
   - `POST /compare` verified live: Aavin milk ₹22×2 = ₹44, real Zepto search + live agent.
 - Note: free instance sleeps after ~15 min idle; first request then takes ~50s to wake.
+
+## SECOND AGENT 2026-10-24 ✅ LIVE — WhatsApp-style chat app
+
+- Same Render URL: https://grocery-compare-wdzz.onrender.com/  (chat UI at /)
+- Flow: greet → grocery list → live Zepto search + AgenticOrg match → per-store
+  comparison with cheapest marked → tap a store → cart with per-item "Open in
+  store" deep links + pay button.
+- Backend: chat.py state machine over the existing compare engine. parse_list is
+  isolated as a hook for a future AgenticOrg parse agent.
+- Verified live in production (commit 7425a18).
+- Honest limit: web can't auto-fill a Zepto/Instamart cart or trigger their
+  payment from a redirect — that needs the Playwright-on-own-account step.
+  The app hands over deep links instead.
+
+## SECOND STORE 2026-10-24 — Blinkit (graceful)
+
+- Added adapters/blinkit.py (Apify solidcode~blinkit-scraper), wired into agent1
+  (ENABLE_BLINKIT=true, reuses APIFY_TOKEN). Chat shows Zepto vs Blinkit with
+  honest "best pick" + apples-to-apples savings only for equal coverage.
+- CAVEAT: every Blinkit/Instamart Apify actor is PAY_PER_EVENT; the free Apify
+  plan only partially allows them (random 402s), so Blinkit is intermittent on
+  free. The app hides a store that returns nothing, so it never looks broken.
+  Reliable 2-store comparison needs Apify billing added. Zepto actor is free.

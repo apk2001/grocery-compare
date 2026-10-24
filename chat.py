@@ -30,7 +30,7 @@ CITY_COORDS = {
 }
 DEFAULT_CITY = "chennai"
 
-STORE_LABELS = {"zepto": "Zepto", "instamart": "Swiggy Instamart"}
+STORE_LABELS = {"zepto": "Zepto", "blinkit": "Blinkit", "instamart": "Swiggy Instamart"}
 
 SIZE_RE = re.compile(
     r"\b\d+(?:\.\d+)?\s?(?:kg|g|gm|gms|grams?|l|ltr|litre|liter|ml|pcs?|pieces?|dozen)\b",
@@ -91,31 +91,44 @@ def _store_search_url(platform: str, query: str) -> str:
     q = quote(query)
     if platform == "instamart":
         return f"https://www.swiggy.com/instamart/search?custom_back=true&query={q}"
+    if platform == "blinkit":
+        return f"https://blinkit.com/s/?q={q}"
     return f"https://www.zeptonow.com/search?query={q}"
 
 
+def _found_count(r) -> int:
+    return sum(1 for it in r.items if it.sku_id)
+
+
 def _format_results(results) -> dict:
-    """Build the comparison message + per-store choice buttons."""
-    ok = [r for r in results if r.error is None and r.items]
+    """Build the comparison message + per-store choice buttons.
+
+    Only include stores that actually matched at least one item, so a store
+    blocked by the Apify free plan (pay-per-event) is hidden rather than shown
+    as an empty ₹0 cart.
+    """
+    ok = [r for r in results if r.error is None and _found_count(r) > 0]
     if not ok:
         return {
             "messages": [
                 {"text": "😕 I couldn't find prices for that list right now. Try different wording, or send the list again."}
             ]
         }
+    # Best = most items found, then cheapest.
     ranked = sorted(ok, key=lambda r: (len(r.missing), r.subtotal))
-    cheapest = ranked[0]
+    best = ranked[0]
 
     lines = ["💰 *Price comparison*\n"]
     for i, r in enumerate(ranked):
         label = STORE_LABELS.get(r.platform, r.platform.title())
-        found = len(r.items) - len(r.missing)
-        tag = "  ✅ cheapest" if i == 0 else ""
-        lines.append(f"*{label}* — ₹{r.subtotal:.0f}  ({found}/{len(r.items)} items){tag}")
-    if len(ranked) > 1:
-        saving = ranked[1].subtotal - cheapest.subtotal
+        tag = "  ✅ best pick" if i == 0 and len(ranked) > 1 else ""
+        lines.append(f"*{label}* — ₹{r.subtotal:.0f}  ({_found_count(r)}/{len(r.items)} items){tag}")
+    # Only claim a saving against a store covering the SAME number of items (apples-to-apples).
+    same = [r for r in ranked[1:] if len(r.missing) == len(best.missing)]
+    if same:
+        saving = same[0].subtotal - best.subtotal
         if saving > 0:
-            lines.append(f"\nPick {STORE_LABELS.get(cheapest.platform, cheapest.platform.title())} to save ₹{saving:.0f}.")
+            lines.append(f"\n{STORE_LABELS.get(best.platform, best.platform.title())} is cheaper by ₹{saving:.0f} for the same items.")
     lines.append("\nWhich store do you want to buy from?")
 
     buttons = [
